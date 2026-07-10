@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "nombre": "Angela Martínez",
+    "email": "AngeM@mail.com",
+    "puesto": "CEO",
+    "foto": "https://picsum.photos/id/64/200/300"
+  },
+  {
+    "id": 2,
+    "nombre": "Sebastian Sobczak",
+    "email": "sebastians@mail.com",
+    "puesto": "CTO",
+    "foto": "https://picsum.photos/id/338/200/300"
+  },
+  {
+    "id": 3,
+    "nombre": "Joaquin Gomez",
+    "email": "jgomez@mail.com",
+    "puesto": "Fotografo",
+    "foto": "https://picsum.photos/id/91/200/300"
+  },
+  {
+    "id": 4,
+    "nombre": "Catalina George",
+    "email": "catalina@mail.com",
+    "puesto": "Diseñadora",
+    "foto": "https://picsum.photos/id/65/200/300"
+  }
+]
