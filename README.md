@@ -54,6 +54,41 @@ DISEÑO:
 
 ---
 
+Instalación
+
+Clonar el repositorio
+
+```bash
+git clone https://github.com/laurabrunori/proyectoReactJS.git
+```
+
+Ingresar al proyecto
+
+```bash
+cd proyectoReactJS
+```
+
+Instalar dependencias
+
+```bash
+npm install
+```
+
+Ejecutar el proyecto
+
+```bash
+npm run dev
+```
+
+Abrir en el navegador
+
+```
+http://localhost:5173
+```
+
+---
+
+
 USUARIO TESTER:
 
 Email:
