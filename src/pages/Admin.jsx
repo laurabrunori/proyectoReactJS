@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout/Layout";
 import ProductoForm from "../components/ProductoForm";
+import CuponForm from "../components/CuponForm";
 
 import {
   obtenerProductos,
@@ -9,33 +10,45 @@ import {
   eliminarProducto,
 } from "../services/productos";
 
+import {
+  obtenerCupones,
+  agregarCupon,
+  editarCupon,
+  eliminarCupon,
+} from "../services/cupones";
+
 export default function Admin() {
+  // -----------------------------
+  // PRODUCTOS
+  // -----------------------------
   const [productos, setProductos] = useState([]);
   const [productoEditar, setProductoEditar] = useState(null);
- 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  // -----------------------------
+  // CUPONES
+  // -----------------------------
+  const [cupones, setCupones] = useState([]);
+  const [cuponEditar, setCuponEditar] = useState(null);
+
+  useEffect(() => {
+    cargarProductos();
+    cargarCupones();
+  }, []);
+
+  // ===========================
+  // PRODUCTOS
+  // ===========================
 
   async function cargarProductos() {
-    setLoading(true);
-    setError("");
-
     try {
       const datos = await obtenerProductos();
       setProductos(datos);
     } catch (error) {
-      console.error("Error al cargar productos:", error);
-      setError("No fue posible cargar los productos.");
-    } finally {
-      setLoading(false);
+      console.error(error);
     }
   }
 
-  useEffect(() => {
-    cargarProductos();
-  }, []);
-
-  async function guardar(producto) {
+  async function guardarProducto(producto) {
     try {
       if (productoEditar) {
         await editarProducto(productoEditar.id, producto);
@@ -44,38 +57,68 @@ export default function Admin() {
         await agregarProducto(producto);
       }
 
-      await cargarProductos();
-
-    } catch (error) {
-      console.error("Error al guardar producto:", error);
-      setError("No fue posible guardar el producto.");
-    }
-  }
-
-  async function confirmarEliminar(producto) {
-    const confirmar = window.confirm(
-      `¿Desea eliminar "${producto.nombre}"?`
-    );
-
-    if (!confirmar) return;
-
-    try {
-      await eliminarProducto(producto.id);
       cargarProductos();
     } catch (error) {
       console.error(error);
     }
   }
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="text-center mt-5">
-          <div className="spinner-border text-primary" role="status"></div>
-          <p className="mt-3">Cargando productos...</p>
-        </div>
-      </Layout>
+  async function borrarProducto(id) {
+    const confirmar = window.confirm(
+      "¿Desea eliminar este producto?"
     );
+
+    if (!confirmar) return;
+
+    try {
+      await eliminarProducto(id);
+      cargarProductos();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // ===========================
+  // CUPONES
+  // ===========================
+
+  async function cargarCupones() {
+    try {
+      const datos = await obtenerCupones();
+      setCupones(datos);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function guardarCupon(cupon) {
+    try {
+      if (cuponEditar) {
+        await editarCupon(cuponEditar.id, cupon);
+        setCuponEditar(null);
+      } else {
+        await agregarCupon(cupon);
+      }
+
+      cargarCupones();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function borrarCupon(id) {
+    const confirmar = window.confirm(
+      "¿Desea eliminar este cupón?"
+    );
+
+    if (!confirmar) return;
+
+    try {
+      await eliminarCupon(id);
+      cargarCupones();
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -86,78 +129,137 @@ export default function Admin() {
           Panel de Administración
         </h2>
 
-        {error && (
-          <div className="alert alert-danger">
-            {error}
-          </div>
-        )}
+        {/* ==========================
+            PRODUCTOS
+        =========================== */}
+
+        <h3>Gestión de Productos</h3>
 
         <ProductoForm
-          onGuardar={guardar}
+          onGuardar={guardarProducto}
           productoEditar={productoEditar}
         />
 
-        <hr />
+        <table className="table table-striped table-hover mt-4">
 
-        <h3 className="mb-3">
-          Productos cargados
-        </h3>
+          <thead className="table-dark">
 
-        {productos.length === 0 ? (
-          <div className="alert alert-warning">
-            No hay productos cargados.
-          </div>
-        ) : (
-          <table className="table table-striped table-hover">
+            <tr>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Acciones</th>
+            </tr>
 
-            <thead className="table-dark">
-              <tr>
-                <th>Nombre</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Acciones</th>
+          </thead>
+
+          <tbody>
+
+            {productos.map((producto) => (
+
+              <tr key={producto.id}>
+
+                <td>{producto.nombre}</td>
+
+                <td>${producto.precio}</td>
+
+                <td>{producto.stock}</td>
+
+                <td>
+
+                  <button
+                    className="btn btn-warning btn-sm me-2"
+                    onClick={() => setProductoEditar(producto)}
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() =>
+                      borrarProducto(producto.id)
+                    }
+                  >
+                    Eliminar
+                  </button>
+
+                </td>
+
               </tr>
-            </thead>
 
-            <tbody>
+            ))}
 
-              {productos.map((producto) => (
+          </tbody>
 
-                <tr key={producto.id}>
+        </table>
 
-                  <td>{producto.nombre}</td>
+        <hr className="my-5" />
 
-                  <td>${producto.precio}</td>
+        {/* ==========================
+            CUPONES
+        =========================== */}
 
-                  <td>{producto.stock}</td>
+        <h3>Gestión de Cupones</h3>
 
-                  <td>
+        <CuponForm
+          onGuardar={guardarCupon}
+          cuponEditar={cuponEditar}
+        />
 
-                    <button
-                      className="btn btn-warning btn-sm me-2"
-                      onClick={() => setProductoEditar(producto)}
-                    >
-                      Editar
-                    </button>
+        <table className="table table-striped table-hover mt-4">
 
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => confirmarEliminar(producto)}
-                    >
-                      Eliminar
-                    </button>
+          <thead className="table-dark">
 
-                  </td>
+            <tr>
+              <th>Código</th>
+              <th>Descuento</th>
+              <th>Activo</th>
+              <th>Acciones</th>
+            </tr>
 
-                </tr>
+          </thead>
 
-              ))}
+          <tbody>
 
-            </tbody>
+            {cupones.map((cupon) => (
 
-          </table>
-        )}
+              <tr key={cupon.id}>
 
+                <td>{cupon.codigo}</td>
+
+                <td>{cupon.descuento}%</td>
+
+                <td>
+                  {cupon.activo ? "Sí" : "No"}
+                </td>
+
+                <td>
+
+                  <button
+                    className="btn btn-warning btn-sm me-2"
+                    onClick={() => setCuponEditar(cupon)}
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() =>
+                      borrarCupon(cupon.id)
+                    }
+                  >
+                    Eliminar
+                  </button>
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
 
       </div>
     </Layout>

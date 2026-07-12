@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Layout from "../components/Layout/Layout";
 import { useCart } from "../context/CartContext";
+import { buscarCupon } from "../services/cupones";
 
 export default function Cart() {
   const {
@@ -15,13 +16,35 @@ export default function Cart() {
   const [cupon, setCupon] = useState("");
   const [descuento, setDescuento] = useState(0);
 
-  const aplicarCupon = () => {
-    if (cupon.toUpperCase() === "SAFARI10") {
-      setDescuento(10);
-      alert("Cupón aplicado.");
-    } else {
-      setDescuento(0);
-      alert("Cupón inválido.");
+  const aplicarCupon = async () => {
+    if (!cupon.trim()) {
+      alert("Ingrese un código de cupón.");
+      return;
+    }
+
+    try {
+      const cuponEncontrado = await buscarCupon(cupon);
+
+      if (!cuponEncontrado) {
+        setDescuento(0);
+        alert("El cupón no existe.");
+        return;
+      }
+
+      if (!cuponEncontrado.activo) {
+        setDescuento(0);
+        alert("Este cupón se encuentra inactivo.");
+        return;
+      }
+
+      setDescuento(cuponEncontrado.descuento);
+
+      alert(
+        `Cupón aplicado. Descuento: ${cuponEncontrado.descuento}%`
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Ocurrió un error al validar el cupón.");
     }
   };
 
