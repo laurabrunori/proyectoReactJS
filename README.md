@@ -66,3 +66,5 @@ Norbert2026
 María Laura Brunori
 
 Proyecto desarrollado como Entrega Final del curso ReactJS para Talento Tech 2026.
+
+Deploy 12/7 : Se añadió la gestión de los cupones desde el panel de administrador.
